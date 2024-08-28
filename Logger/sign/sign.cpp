@@ -8,16 +8,16 @@
 
 using namespace std;
 
-Sign::Sign(int bufSize) : signedHashBufSize(bufSize) {
+Sign_cls::Sign_cls(int bufSize) : signedHashBufSize(bufSize) {
     key_generation();
 }
 
-Sign::~Sign() {
+Sign_cls::~Sign_cls() {
     privateKey.clear();
     publicKey.clear();
 }
 
-void Sign::key_generation() {
+void Sign_cls::key_generation() {
     cout << "----Key Generation----" << endl;
     RSA *privateRSA = genPrivateRSA();
     char *pubKey = genPublicRSA(privateRSA);
@@ -30,7 +30,7 @@ void Sign::key_generation() {
     RSA_free(privateRSA);
 }
 
-RSA* Sign::genPrivateRSA() {
+RSA* Sign_cls::genPrivateRSA() {
     RSA *rsa = RSA_generate_key(2048, RSA_F4, NULL, NULL);
     BIO *bio = BIO_new(BIO_s_mem());
     PEM_write_bio_RSAPrivateKey(bio, rsa, NULL, NULL, 0, NULL, NULL);
@@ -42,7 +42,7 @@ RSA* Sign::genPrivateRSA() {
     return rsa;
 }
 
-char* Sign::genPublicRSA(RSA *rsa) {
+char* Sign_cls::genPublicRSA(RSA *rsa) {
     BIO *bp_public = BIO_new(BIO_s_mem());
     PEM_write_bio_RSA_PUBKEY(bp_public, rsa);
     int pub_pkey_size = BIO_pending(bp_public);
@@ -52,15 +52,15 @@ char* Sign::genPublicRSA(RSA *rsa) {
     return pub_pkey;
 }
 
-string Sign::getPublicKey() const {
+string Sign_cls::getPublicKey() const {
     return publicKey;
 }
 
-string Sign::getPrivateKey() const {
+string Sign_cls::getPrivateKey() const {
     return privateKey;
 }
 
-char* Sign::signMessage(std::string privateKey, std::string plainText) {
+char* Sign_cls::signMessage(std::string privateKey, std::string plainText) {
     RSA* privateRSA = createPrivateRSA(privateKey);
     unsigned char* encMessage;
     char* base64Text;
@@ -71,7 +71,7 @@ char* Sign::signMessage(std::string privateKey, std::string plainText) {
     return base64Text;
 }
 
-RSA* Sign::createPrivateRSA(std::string key) {
+RSA* Sign_cls::createPrivateRSA(std::string key) {
     RSA *rsa = NULL;
     const char* c_string = key.c_str();
     BIO * keybio = BIO_new_mem_buf((void*)c_string, -1);
@@ -82,7 +82,7 @@ RSA* Sign::createPrivateRSA(std::string key) {
     return rsa;
 }
 
-bool Sign::RSASign(RSA* rsa, const unsigned char* Msg, size_t MsgLen, unsigned char** EncMsg, size_t* MsgLenEnc) {
+bool Sign_cls::RSASign(RSA* rsa, const unsigned char* Msg, size_t MsgLen, unsigned char** EncMsg, size_t* MsgLenEnc) {
     EVP_MD_CTX* m_RSASignCtx = EVP_MD_CTX_create();
     EVP_PKEY* priKey = EVP_PKEY_new();
     EVP_PKEY_assign_RSA(priKey, rsa);
@@ -108,7 +108,7 @@ bool Sign::RSASign(RSA* rsa, const unsigned char* Msg, size_t MsgLen, unsigned c
     return true;
 }
 
-void Sign::Base64Encode(const unsigned char* buffer, size_t length, char** base64Text) {
+void Sign_cls::Base64Encode(const unsigned char* buffer, size_t length, char** base64Text) {
     BIO *bio, *b64;
     BUF_MEM *bufferPtr;
 
@@ -125,12 +125,12 @@ void Sign::Base64Encode(const unsigned char* buffer, size_t length, char** base6
     *base64Text = (*bufferPtr).data;
 }
 
-void Sign::handleErrors() {
+void Sign_cls::handleErrors() {
     ERR_print_errors_fp(stderr);
     abort();
 }
 
-void Sign::sign_hash(queue<string>& HASH_QUEUE) {
+void Sign_cls::sign_hash(queue<string>& HASH_QUEUE) {
     queue<string> sign(HASH_QUEUE);
 
     cout << "----Signing Hash by private Key" << endl << endl;
@@ -152,4 +152,8 @@ void Sign::sign_hash(queue<string>& HASH_QUEUE) {
 
     delete[] ch;
     cout << "    Signed Hash made: " << hash_signed_queue.size() << endl;
+}
+
+void Sign_cls::clearQueue() {
+    while (!hash_signed_queue.empty()) hash_signed_queue.pop();
 }

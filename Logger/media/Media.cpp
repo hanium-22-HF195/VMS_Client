@@ -1,7 +1,7 @@
 // media/Media.cpp
 #include "Media.h"
 
-Media::Media(const Config& config) {
+Media_cls::Media_cls(const Config_cls& config) {
     width = config.getWidth();
     height = config.getHeight();
     fps = config.getFps();
@@ -12,11 +12,11 @@ Media::Media(const Config& config) {
     lamping_time();
 }
 
-Media::~Media() {
+Media_cls::~Media_cls() {
     pthread_mutex_destroy(&frameLocker);
 }
 
-void Media::open_camera() {
+void Media_cls::open_camera() {
     int deviceID = 0;
     int apiID = CAP_V4L2;
     cap.open(deviceID, apiID);
@@ -27,7 +27,7 @@ void Media::open_camera() {
     }
 }
 
-void Media::lamping_time() {
+void Media_cls::lamping_time() {
     Mat temp;
     for (int i = 0; i < 20; i++) {
         cap >> temp;
@@ -35,7 +35,7 @@ void Media::lamping_time() {
     temp.release();
 }
 
-int Media::init_camera() {
+int Media_cls::init_camera() {
     cout << "----Initalizing---------" << endl;
 
     camera_cfg_recv(width, height, fps);
@@ -61,8 +61,8 @@ int Media::init_camera() {
     return 0;
 }
 
-void* Media::UpdateFrame(void* arg) {
-    Media* media = static_cast<Media*>(arg);
+void* Media_cls::UpdateFrame(void* arg) {
+    Media_cls* media = static_cast<Media_cls*>(arg);
     while (true) {
         Mat tempFrame(Size(media->width, media->height), CV_8UC3);
         media->cap >> tempFrame;
@@ -79,9 +79,9 @@ void* Media::UpdateFrame(void* arg) {
     pthread_exit((void*)0);
 }
 
-void Media::capture_frame() {
+void Media_cls::capture_frame() {
     cout << endl << "----Starting Capturing" << endl << endl;
-    pthread_create(&UpdThread, NULL, Media::UpdateFrame, this);
+    pthread_create(&UpdThread, NULL, Media_cls::UpdateFrame, this);
 
     while (true) {
         Mat currentFrame(Size(width, height), CV_8UC3);
@@ -125,14 +125,21 @@ void Media::capture_frame() {
     }
 }
 
-void Media::convert_frames2gray() {
+void Media_cls::convert_frames2gray() {
     cout << endl << "----Start to convert Frames into Grayscale----" << endl << endl;
     
     while (!bgr_queue.empty()) {
         Mat original = bgr_queue.front();
         bgr_queue.pop();
 
-        string img_name = orifile_path + getCID() + ".jpg";
+        //string img_name = orifile_path + getCID() + ".jpg"; // CID는 캡쳐 되는 동시에 생성되야해서 수정 필요
+        
+        string cid = cid_queue.front();
+        cid_queue_temp.push(cid);
+        string img_name = orifile_path + cid + ".jpg";
+
+        cid_queue.pop();
+
         imwrite(img_name, original);
         Mat temp;
 
@@ -149,7 +156,7 @@ void Media::convert_frames2gray() {
     cout << "----FRAMES CONVERTED---------" << endl << endl;
 }
 
-void Media::edge_detection_BGR() {
+void Media_cls::edge_detection_BGR() {
     cout << "----Building feature vectors." << endl;
 
     while (!G_queue.empty()) {
@@ -164,7 +171,7 @@ void Media::edge_detection_BGR() {
     cout << endl << "    Edge Detection made: " << feature_vector_queue.size() << endl;
 }
 
-string Media::getCID() {
+string Media_cls::getCID() {
     struct timeb tb;
     struct tm tstruct;
     ostringstream oss;
@@ -184,4 +191,11 @@ string Media::getCID() {
     if (s_CID.length() == 21) s_CID.append("00");
 
     return s_CID;
+}
+
+void Media_cls::clearQueue() {
+    while (!bgr_queue.empty()) bgr_queue.pop();
+    while (!cid_queue.empty()) cid_queue.pop();
+    while (!G_queue.empty()) G_queue.pop();
+    while (!feature_vector_queue.empty()) feature_vector_queue.pop();
 }

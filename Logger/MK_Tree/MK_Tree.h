@@ -10,12 +10,13 @@
 using namespace std;
 using namespace cv;
 
-class MK_Tree {
+class MK_Tree_cls {
 public:
-    MK_Tree();
+    MK_Tree_cls();
     void make_hash(queue<cv::Mat>& FV_QUEUE);
-    queue<string>& getHashQueue();
+    void clearQueue();
 
+    queue<string>& getHashQueue(){ return hash_queue; };
 private:
     queue<string> hash_queue;
 };

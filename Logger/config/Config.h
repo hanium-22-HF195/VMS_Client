@@ -4,7 +4,7 @@
 #include <string>
 using namespace std;
 
-class Config {
+class Config_cls {
 private:
     int width;
     int height;
@@ -18,8 +18,8 @@ private:
     int serverPort;
 
 public:
-    Config();  
-    ~Config();  
+    Config_cls();  
+    ~Config_cls();  
 
     void Read_Logger_cfg(); 
 

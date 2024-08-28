@@ -7,7 +7,7 @@
 
 using namespace std;
 
-class Sign {
+class Sign_cls {
 private:
     string privateKey;
     string publicKey;
@@ -23,15 +23,16 @@ private:
     void handleErrors();
 
 public:
-    Sign(int bufSize);
-    ~Sign();
+    Sign_cls(int bufSize);
+    ~Sign_cls();
 
     string getPublicKey() const;
     string getPrivateKey() const;
     char* signMessage(std::string privateKey, std::string plainText);
     void sign_hash(queue<string>& HASH_QUEUE);
 
-    queue<string>& getHashQueue() { return hash_signed_queue; }
+    queue<string>& getSignHashQueue() { return hash_signed_queue; }
+    void clearQueue();
 };
 
 #endif // SIGN_H

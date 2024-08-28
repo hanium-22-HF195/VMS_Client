@@ -4,15 +4,15 @@
 #include <jsoncpp/json/json.h>
 using namespace std;
 
-Config::Config() {
+Config_cls::Config_cls() {
     Read_Logger_cfg(); 
 }
 
-Config::~Config() {
+Config_cls::~Config_cls() {
     
 }
 
-void Config::Read_Logger_cfg() {
+void Config_cls::Read_Logger_cfg() {
     string configPath = "../Sys_cfg.json"; 
 
     ifstream json_dir(configPath);
@@ -44,13 +44,13 @@ void Config::Read_Logger_cfg() {
     serverPort = value["Logger"]["Server port"].asInt();
 }
 
-int Config::getWidth() const { return width; }
-int Config::getHeight() const { return height; }
-int Config::getFps() const { return fps; }
-int Config::getFrameCount() const { return frameCount; }
-int Config::getSignedHashBufSize() const { return signedHashBufSize; }
-string Config::getOrifilePath() const { return orifilePath; }
-string Config::getYfilePath() const { return yfilePath; }
-string Config::getHashfilePath() const { return hashfilePath; }
-string Config::getServerIp() const { return serverIp; }
-int Config::getServerPort() const { return serverPort; }
+int Config_cls::getWidth() const { return width; }
+int Config_cls::getHeight() const { return height; }
+int Config_cls::getFps() const { return fps; }
+int Config_cls::getFrameCount() const { return frameCount; }
+int Config_cls::getSignedHashBufSize() const { return signedHashBufSize; }
+string Config_cls::getOrifilePath() const { return orifilePath; }
+string Config_cls::getYfilePath() const { return yfilePath; }
+string Config_cls::getHashfilePath() const { return hashfilePath; }
+string Config_cls::getServerIp() const { return serverIp; }
+int Config_cls::getServerPort() const { return serverPort; }

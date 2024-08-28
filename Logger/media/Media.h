@@ -13,10 +13,10 @@
 using namespace std;
 using namespace cv;
 
-class Media {
+class Media_cls {
 public:
-    Media(const Config& config);
-    ~Media();
+    Media_cls(const Config_cls& config);
+    ~Media_cls();
 
     void open_camera();
     void lamping_time();
@@ -30,6 +30,8 @@ public:
     queue<cv::Mat>& getBGRQueue() { return bgr_queue; }
     queue<cv::Mat>& getGQueue() { return G_queue; }
     queue<cv::Mat>& getFeatureVectorQueue() { return feature_vector_queue; } 
+    queue<string>& getCIDQueue() { return cid_queue_temp; } 
+    void clearQueue();
 
 private:
     int width, height, fps, frame_count;
@@ -41,6 +43,7 @@ private:
 
     queue<Mat> bgr_queue;
     queue<string> cid_queue;
+    queue<string> cid_queue_temp;
     queue<Mat> G_queue;
     queue<Mat> feature_vector_queue;
 };

@@ -1,10 +1,10 @@
 #include "MK_Tree.h"
 
-MK_Tree::MK_Tree() {
+MK_Tree_cls::MK_Tree_cls() {
 
 }
 
-void MK_Tree::make_hash(queue<cv::Mat>& FV_QUEUE)
+void MK_Tree_cls::make_hash(queue<cv::Mat>& FV_QUEUE)
 {
     queue<cv::Mat> Feature_Vector_queue(FV_QUEUE);
     cout << endl
@@ -41,6 +41,6 @@ void MK_Tree::make_hash(queue<cv::Mat>& FV_QUEUE)
     cout << "    hash made : " << hash_queue.size() << endl;
 }
 
-queue<string>& MK_Tree::getHashQueue() {
-    return hash_queue;  // Return reference to the hash_queue
+void MK_Tree_cls::clearQueue() {
+    while (!hash_queue.empty()) hash_queue.pop();
 }
