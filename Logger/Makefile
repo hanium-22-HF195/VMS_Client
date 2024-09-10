@@ -15,7 +15,7 @@ MEDIA_DIR = media
 MK_TREE_DIR = MK_Tree
 
 #--소스 파일 및 오브젝트 파일 설정----
-SRC = Logger.cpp $(CONFIG_DIR)/Config.cpp $(SIGN_DIR)/sign.cpp $(CLIENT_DIR)/VMS_Client.cpp $(QUEUE_DIR)/msg_queue.cpp $(MEDIA_DIR)/Media.cpp $(MK_TREE_DIR)/MK_Tree.cpp
+SRC = Logger.cpp $(CONFIG_DIR)/Config.cpp $(SIGN_DIR)/sign.cpp $(CLIENT_DIR)/VMS_Client.cpp $(QUEUE_DIR)/msg_queue.cpp $(MEDIA_DIR)/Media.cpp $(MEDIA_DIR)/create_cid.cpp $(MK_TREE_DIR)/MK_Tree.cpp
 OBJ = $(SRC:.cpp=.o)
 
 #--기본 타겟----

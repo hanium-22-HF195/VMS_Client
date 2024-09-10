@@ -9,6 +9,7 @@
 #include <queue>
 #include <string>
 #include <pthread.h>
+#include "create_cid.h"
 
 using namespace std;
 using namespace cv;
@@ -20,12 +21,11 @@ public:
 
     void open_camera();
     void lamping_time();
-    int init_camera();
+    int init_frame();
     static void* UpdateFrame(void* arg);
     void capture_frame();
     void convert_frames2gray();
     void edge_detection_BGR();
-    string getCID();
 
     queue<cv::Mat>& getBGRQueue() { return bgr_queue; }
     queue<cv::Mat>& getGQueue() { return G_queue; }

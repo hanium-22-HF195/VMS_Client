@@ -1,4 +1,3 @@
-// media/Media.cpp
 #include "Media.h"
 
 Media_cls::Media_cls(const Config_cls& config) {
@@ -29,16 +28,20 @@ void Media_cls::open_camera() {
 
 void Media_cls::lamping_time() {
     Mat temp;
+    if (!cap.isOpened())
+    {
+        cerr << "ERROR! Unable to open camera -- lamping time\n";
+    }
     for (int i = 0; i < 20; i++) {
         cap >> temp;
     }
     temp.release();
 }
 
-int Media_cls::init_camera() {
+int Media_cls::init_frame() {
     cout << "----Initalizing---------" << endl;
 
-    camera_cfg_recv(width, height, fps);
+    //camera_cfg_recv(width, height, fps);
 
     cap.set(CAP_PROP_FRAME_WIDTH, width);
     cap.set(CAP_PROP_FRAME_HEIGHT, height);
@@ -49,7 +52,7 @@ int Media_cls::init_camera() {
     cout << "    FPS : " << cvRound(cap.get(CAP_PROP_FPS)) << endl;
 
     Mat img(Size(width, height), CV_8UC3, Scalar(0));
-    frame = img.clone();
+    this->frame = img.clone();
     img.release();
 
     if (!cap.isOpened()) {
@@ -87,7 +90,7 @@ void Media_cls::capture_frame() {
         Mat currentFrame(Size(width, height), CV_8UC3);
 
         pthread_mutex_lock(&frameLocker);
-        currentFrame = frame;
+        currentFrame = this->frame;
         pthread_mutex_unlock(&frameLocker);
 
         int sum1 = (int)sum(currentFrame)[0];
@@ -169,28 +172,6 @@ void Media_cls::edge_detection_BGR() {
         temp.release();
     }
     cout << endl << "    Edge Detection made: " << feature_vector_queue.size() << endl;
-}
-
-string Media_cls::getCID() {
-    struct timeb tb;
-    struct tm tstruct;
-    ostringstream oss;
-    string s_CID;
-    char buf[128];
-
-    ftime(&tb);
-    if (nullptr != localtime_r(&tb.time, &tstruct)) {
-        strftime(buf, sizeof(buf), "%Y-%m-%d_%T.", &tstruct);
-        oss << buf;
-        oss << tb.millitm;
-    }
-
-    s_CID = oss.str();
-    s_CID = s_CID.substr(0, 23);
-    if (s_CID.length() == 22) s_CID.append("0");
-    if (s_CID.length() == 21) s_CID.append("00");
-
-    return s_CID;
 }
 
 void Media_cls::clearQueue() {

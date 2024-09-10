@@ -63,12 +63,12 @@ void camera_cfg_recv(int &WIDTH, int &HEIGHT, int &FPS)
 		}
 		
 		sleep(0.2);
-		camera_cfg_res_send();
+		//camera_cfg_res_send();
 	}
 	cout << "    Camera Setting Changes to: " << endl;
 	cout << "    width: " << WIDTH << "| height: " << HEIGHT << "| fps: " << FPS << endl;
 }
-
+/*
 // Logger(RES) -> WEB UI(RECV)
 void camera_cfg_res_send()
 {
@@ -152,4 +152,4 @@ int Image_Hash_response() {
 	{
 		cout << "    Image Hash saved." << endl;
 	}
-}
+}*/
