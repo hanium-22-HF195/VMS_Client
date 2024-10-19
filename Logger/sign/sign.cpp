@@ -18,8 +18,8 @@ Sign_cls::Sign_cls(int bufSize) : signedHashBufSize(bufSize)
 
 Sign_cls::~Sign_cls()
 {
-    privateKey.clear();
-    publicKey.clear();
+    m_privateKey.clear();
+    m_publicKey.clear();
 }
 
 void Sign_cls::key_generation()
@@ -27,12 +27,12 @@ void Sign_cls::key_generation()
     cout << "----Key Generation----" << endl;
     RSA *privateRSA = genPrivateRSA();
     char *pubKey = genPublicRSA(privateRSA);
-    publicKey = pubKey;
+    m_publicKey = pubKey;
     cout << "PRIKEY and PUBKEY are made" << endl;
     cout << "public Key = " << endl
-         << publicKey << endl;
+         << m_publicKey << endl;
     cout << "private key = " << endl
-         << privateKey;
+         << m_privateKey;
 
     free(pubKey);
     RSA_free(privateRSA);
@@ -46,7 +46,7 @@ RSA *Sign_cls::genPrivateRSA()
     int pem_pkey_size = BIO_pending(bio);
     char *pem_pkey = (char *)calloc((pem_pkey_size) + 1, 1);
     BIO_read(bio, pem_pkey, pem_pkey_size);
-    privateKey = pem_pkey;
+    m_privateKey = pem_pkey;
     BIO_free_all(bio);
     return rsa;
 }
@@ -64,12 +64,12 @@ char *Sign_cls::genPublicRSA(RSA *rsa)
 
 string Sign_cls::getPublicKey() const
 {
-    return publicKey;
+    return m_publicKey;
 }
 
 string Sign_cls::getPrivateKey() const
 {
-    return privateKey;
+    return m_privateKey;
 }
 
 char *Sign_cls::signMessage(string privateKey, string plainText)
@@ -89,7 +89,7 @@ char *Sign_cls::signMessage(string privateKey, string plainText)
     // *** KYH
     // check encMessage and base64Text
     // encMessage is notchanged
-
+    
     free(encMessage);
     return base64Text;
 }
@@ -161,7 +161,7 @@ void Sign_cls::Base64Encode(const unsigned char *buffer, size_t length, char **b
     BIO_set_close(bio, BIO_NOCLOSE);
     BIO_free_all(bio);
 
-    *base64Text = (*bufferPtr).data;
+    *base64Text = strdup((*bufferPtr).data);
 }
 
 void Sign_cls::handleErrors()
@@ -170,35 +170,54 @@ void Sign_cls::handleErrors()
     abort();
 }
 
-void Sign_cls::sign_hash(queue<string> &HASH_QUEUE)
+void Sign_cls::sign_hash(queue<string>& HASH_QUEUE, mutex& hash_queue_mtx)
 {
-    queue<string> sign(HASH_QUEUE);
+    HashPair m_HashPair;
+    string m_hash;
+    hash_queue_mtx.lock();
+    m_hash = HASH_QUEUE.front();
+    HASH_QUEUE.pop();
+    hash_queue_mtx.unlock();
 
-    cout << "----Signing Hash by private Key" << endl
-         << endl;
+    //cout << "----Signing Hash by private Key" << endl << endl;
 
     char *ch = new char[signedHashBufSize];
+    string signed_hash = signMessage(m_privateKey, m_hash);
+        
+    memset(ch, 0, sizeof(char) * signedHashBufSize);
+    strcpy(ch, signed_hash.c_str());
 
-    while (!sign.empty())
-    {
-        string signed_hash = signMessage(privateKey, sign.front());
+    m_HashPair.hash = m_hash;
+    m_HashPair.sign_hash = signed_hash;
 
-        memset(ch, 0, sizeof(char) * signedHashBufSize);
-        strcpy(ch, signed_hash.c_str());
+    hash_signed_queue_mtx.lock();
+    //hash_signed_queue.push(signed_hash);
+    HashPair_queue.push(m_HashPair);
+    hash_signed_queue_mtx.unlock();
 
-        hash_signed_queue.push(signed_hash);
-
-        cout << "signed_hash : " << signed_hash << endl;
-
-        sign.pop();
-    }
+    //cout << "signed_hash : " << signed_hash << endl;
+    //cout << "Successfully make signed_hash" << endl;
 
     delete[] ch;
-    cout << "    Signed Hash made: " << hash_signed_queue.size() << endl;
 }
 
-void Sign_cls::clearQueue()
-{
-    while (!hash_signed_queue.empty())
-        hash_signed_queue.pop();
+
+void Sign_cls::sign_hash_task(MK_Tree_cls& mk_tree_inst) {
+    auto last_print_time = chrono::steady_clock::now();
+    while (true) {
+        if(!mk_tree_inst.getHashQueue().empty()){
+            sign_hash(mk_tree_inst.getHashQueue(), mk_tree_inst.getHashQueueMutex());
+        }
+        auto current_time = chrono::steady_clock::now();
+        auto elapsed = chrono::duration_cast<chrono::seconds>(current_time - last_print_time).count();
+        if (elapsed >= 1) {
+            cout << "    HashPair_queue size : " << HashPair_queue.size() << endl;
+            last_print_time = current_time;
+        }
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+}
+
+void Sign_cls::start_sign_hash_thread(MK_Tree_cls& mk_tree_inst) {
+    sign_hash_thread = thread(&Sign_cls::sign_hash_task, this, ref(mk_tree_inst));
 }

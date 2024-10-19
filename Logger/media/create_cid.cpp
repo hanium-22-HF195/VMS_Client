@@ -53,7 +53,7 @@ int update_sequence (int shmid) {
     
     // read a sequence number in share memory
     char *str = (char*) shmat(shmid,(void*)0,0); // to attach the process to shared memory
-    printf("Data read from memory: %s\n",str);
+    //printf("Data read from memory: %s\n",str);
     int sequence = atoi(str);
     int current_sequence = sequence;
     shmdt(str);
@@ -78,7 +78,8 @@ string getCID() {
     shmid = init_shared_mem();
 
     int current_sequence = update_sequence(shmid);
-    sprintf(buf, "%012llX-%4d", getIFMAC(iface), current_sequence);
+    sprintf(buf, "%012llX-%04d", getIFMAC(iface), current_sequence);
+
 
     //shmctl(shmid, IPC_RMID, NULL); // to deallocate the shared memory
 

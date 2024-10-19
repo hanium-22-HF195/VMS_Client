@@ -38,8 +38,10 @@ void Config_cls::Read_Logger_cfg() {
     frameCount = value["Logger"]["frame count"].asInt();
     signedHashBufSize = value["Logger"]["signed hash bufsize"].asInt();
     orifilePath = value["Logger"]["original file path"].asString();
-    yfilePath = value["Logger"]["Y frame file path"].asString();
-    hashfilePath = value["Logger"]["hash file path"].asString();
+    //yfilePath = value["Logger"]["Y frame file path"].asString();
+    //hashfilePath = value["Logger"]["hash file path"].asString();
+    objectDetectorIp = value["Logger"]["Object Detector Server IP addr"].asString();
+    objectDetectorPort = value["Logger"]["Object Detector Server port"].asInt();
     serverIp = value["Logger"]["Server IP addr"].asString();
     serverPort = value["Logger"]["Server port"].asInt();
 }
@@ -50,7 +52,9 @@ int Config_cls::getFps() const { return fps; }
 int Config_cls::getFrameCount() const { return frameCount; }
 int Config_cls::getSignedHashBufSize() const { return signedHashBufSize; }
 string Config_cls::getOrifilePath() const { return orifilePath; }
-string Config_cls::getYfilePath() const { return yfilePath; }
-string Config_cls::getHashfilePath() const { return hashfilePath; }
+//string Config_cls::getYfilePath() const { return yfilePath; }
+//string Config_cls::getHashfilePath() const { return hashfilePath; }
+string Config_cls::getObjectDetectorIp() const { return objectDetectorIp; }
+int Config_cls::getObjectDetectorPort() const { return objectDetectorPort; }
 string Config_cls::getServerIp() const { return serverIp; }
 int Config_cls::getServerPort() const { return serverPort; }

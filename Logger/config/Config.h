@@ -12,8 +12,10 @@ private:
     int frameCount;
     int signedHashBufSize;
     string orifilePath;
-    string yfilePath;
-    string hashfilePath;
+    //string yfilePath;
+    //string hashfilePath;
+    string objectDetectorIp;
+    int objectDetectorPort;
     string serverIp;
     int serverPort;
 
@@ -29,8 +31,10 @@ public:
     int getFrameCount() const;
     int getSignedHashBufSize() const;
     string getOrifilePath() const;
-    string getYfilePath() const;
-    string getHashfilePath() const;
+    //string getYfilePath() const;
+    //string getHashfilePath() const;
+    string getObjectDetectorIp() const;
+    int getObjectDetectorPort() const;
     string getServerIp() const;
     int getServerPort() const;
 };
