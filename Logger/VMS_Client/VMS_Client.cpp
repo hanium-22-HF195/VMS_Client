@@ -145,7 +145,8 @@ void VMS_Client_cls::send_image_task(queue<matadata>& matadata_queue, mutex& mat
     while (true) {
         if(!matadata_queue.empty()){
             if (!matadata_queue.front().sign_hash.empty() && 
-                !matadata_queue.front().object_Detection_result.label.empty()) {
+                !matadata_queue.front().object_Detection_result.label.empty() &&
+                matadata_queue.front().image_save_state == true) {
                 send_image(matadata_queue, matadata_mutex);
             }
         }

@@ -45,3 +45,4 @@ void MK_Tree_cls::make_hash_task(queue<matadata>& matadata_queue, Media_cls& med
 void MK_Tree_cls::start_make_hash_thread(queue<matadata>& matadata_queue, Media_cls& media_inst) {
     make_hash_thread = thread(&MK_Tree_cls::make_hash_task, this, ref(matadata_queue), ref(media_inst));
 }
+

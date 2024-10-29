@@ -17,6 +17,7 @@ struct ODResult {
 struct matadata {
     string cid;
     Mat BGR_frame;
+    bool image_save_state = false;
     bool G_frame_state = false;
     bool feature_vector_state = false;
     string hash;

@@ -108,7 +108,7 @@ void Media_cls::capture_frame(queue<matadata>& matadata_queue, mutex& matadata_m
     frameClone.release();
 }
 
-void Media_cls::convert_frames2gray(queue<matadata>& matadata_queue) {
+void Media_cls::image_save(queue<matadata>& matadata_queue) {
     Mat original;
     string m_cid;
 
@@ -118,6 +118,15 @@ void Media_cls::convert_frames2gray(queue<matadata>& matadata_queue) {
 
     cout << "img_name : "<< img_name << endl;
     imwrite(img_name, original);
+
+    matadata_queue.front().image_save_state = true;
+
+    original.release();
+}
+
+void Media_cls::convert_frames2gray(queue<matadata>& matadata_queue) {
+    Mat original;
+    matadata_queue.front().BGR_frame.copyTo(original);
 
     cvtColor(original, m_G_frame, COLOR_BGR2GRAY);
 
@@ -134,7 +143,7 @@ void Media_cls::edge_detection_BGR(queue<matadata>& matadata_queue) {
 }
 
 void Media_cls::capture_frame_task(queue<matadata>& matadata_queue, mutex& matadata_mutex) {
-    pthread_setname_np(pthread_self(), "thread 1");
+    pthread_setname_np(pthread_self(), "thread 0");
     while (true) {
         if (set_frame() == -1) {
             cerr << "Error: init_frame failed." << endl;
@@ -147,6 +156,27 @@ void Media_cls::capture_frame_task(queue<matadata>& matadata_queue, mutex& matad
 
 void Media_cls::start_capture_thread(queue<matadata>& matadata_queue, mutex& matadata_mutex) {
     capture_thread = thread(&Media_cls::capture_frame_task, this, ref(matadata_queue), ref(matadata_mutex));
+}
+
+void Media_cls::capture_image_save_task(queue<matadata>& matadata_queue) {
+    pthread_setname_np(pthread_self(), "thread 1");
+    while (true) {
+        if(!matadata_queue.empty()){
+            if(!matadata_queue.front().cid.empty() && matadata_queue.front().image_save_state == false ){
+                auto total_start_time = chrono::steady_clock::now();
+                image_save(matadata_queue);
+                auto total_end_time = chrono::steady_clock::now();
+                cout << "T1: "
+                    << chrono::duration_cast<chrono::milliseconds>(total_end_time - total_start_time).count()
+                    << " ms" << endl;
+            }
+        }
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+}
+
+void Media_cls::start_capture_save_thread(queue<matadata>& matadata_queue) {
+    image_save_thread = thread(&Media_cls::capture_image_save_task, this, ref(matadata_queue));
 }
 
 void Media_cls::convert_frames2gray_task(queue<matadata>& matadata_queue) {
