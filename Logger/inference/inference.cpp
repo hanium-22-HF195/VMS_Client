@@ -67,13 +67,8 @@ size_t WriteCallback_OD(void* contents, size_t size, size_t nmemb, std::string* 
 //         }
 //     }
 // }
-void Inference::send_request(Media_cls& media_inst) {
+void Inference::send_request(queue<matadata>& matadata_queue) {
     string m_cid;
-    media_inst.getCIDQueueMutex().lock();
-    if (!media_inst.getCIDQueue().empty()) {
-        m_cid = media_inst.getCIDQueue().front();
-    }
-    media_inst.getCIDQueueMutex().unlock();
     
     ODResult result;
     result.label = "cat, remote, cat";
@@ -83,30 +78,29 @@ void Inference::send_request(Media_cls& media_inst) {
                          "{\"xmin\":343.42,\"ymin\":21.9,\"xmax\":639.54,\"ymax\":371.15}"; 
     result.objectcount = 3; 
 
-    OD_result_queue_mtx.lock();
-    OD_result_queue.push(result);
-    OD_result_queue_mtx.unlock();
+    matadata_queue.front().object_Detection_result = result;
 
     this_thread::sleep_for(chrono::milliseconds(50));
 }
 
 
-void Inference::send_request_task(Media_cls& media_inst) {
-    auto last_print_time = chrono::steady_clock::now();
+void Inference::send_request_task(queue<matadata>& matadata_queue) {
+    pthread_setname_np(pthread_self(), "thread 3");
     while (true) {
-        if(!media_inst.getCIDQueue().empty()){
-            send_request(media_inst);
-        }
-        auto current_time = chrono::steady_clock::now();
-        auto elapsed = chrono::duration_cast<chrono::seconds>(current_time - last_print_time).count();
-        if (elapsed >= 1) {
-            cout << "    OD_result_queue size : " << OD_result_queue.size() << endl;
-            last_print_time = current_time;
+        if(!matadata_queue.empty()){
+            if(!matadata_queue.front().cid.empty() && matadata_queue.front().object_Detection_result.label.empty()){
+                auto total_start_time = chrono::steady_clock::now(); // 총 시간 시작
+                send_request(matadata_queue);
+                auto total_end_time = chrono::steady_clock::now(); // 총 시간 끝
+                cout << "T3: "
+                    << chrono::duration_cast<chrono::milliseconds>(total_end_time - total_start_time).count()
+                    << " ms" << endl;
+            }
         }
         this_thread::sleep_for(chrono::milliseconds(10)); 
     }
 }
 
-void Inference::start_send_request_thread(Media_cls& media_inst) {
-    objectDetection_thread = thread(&Inference::send_request_task, this, ref(media_inst));
+void Inference::start_send_request_thread(queue<matadata>& matadata_queue) {
+    objectDetection_thread = thread(&Inference::send_request_task, this, ref(matadata_queue));
 }

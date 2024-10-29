@@ -31,7 +31,7 @@
     {
         "width"                 : 640,
         "height"                : 480,
-        "fps"                   : 10,
+        "fps"                   : 30,
         "frame count"           : 10,
         "signed hash bufsize"   : 350,
         
@@ -39,6 +39,8 @@
         "hash file path"        : "/home/jetson/Web-UI/static/hash.txt",
         "original file path"    : "/home/pi/images/",
         
+        "Object Detector Server IP addr": "192.168.0.20",
+        "Object Detector Server port": 8080,
         "Server IP addr": "192.168.0.20",
         "Server port": 8080
     },

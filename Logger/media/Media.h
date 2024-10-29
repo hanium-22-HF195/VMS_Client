@@ -4,6 +4,7 @@
 #include <sys/timeb.h>
 #include <iostream>
 #include "../config/Config.h"
+#include "../matadata/matadata.h"
 #include <opencv2/opencv.hpp>
 #include <queue>
 #include <string>
@@ -22,24 +23,25 @@ public:
 
     void open_camera();
     void lamping_time();
-    int init_frame();
+    int set_frame();
     static void* UpdateFrame(void* arg);
-    void capture_frame();
-    void convert_frames2gray();
-    void edge_detection_BGR();
+    void capture_frame(queue<matadata>& matadata_queue, mutex& matadata_mutex);
+    void convert_frames2gray(queue<matadata>& matadata_queue);
+    void edge_detection_BGR(queue<matadata>& matadata_queue);
 
     queue<cv::Mat>& getBGRQueue() { return bgr_queue; }
     queue<cv::Mat>& getGQueue() { return G_queue; }
     queue<cv::Mat>& getFeatureVectorQueue() { return feature_vector_queue; } 
     queue<string>& getCIDQueue() { return cid_queue; } 
+    Mat getEdgeResult() { return m_edge_result; }
 
-    void start_capture_thread();              // t1 스레드를 시작하는 함수
-    void start_convert_frames2gray_thread();  // t2 스레드를 시작하는 함수
-    void start_edge_detection_thread();       // t4 스레드를 시작하는 함수
+    void start_capture_thread(queue<matadata>& matadata_queue, mutex& matadata_mutex);              // t1 스레드를 시작하는 함수
+    void start_convert_frames2gray_thread(queue<matadata>& matadata);                               // t2 스레드를 시작하는 함수
+    void start_edge_detection_thread(queue<matadata>& matadata);                              // t4 스레드를 시작하는 함수
 
-    void capture_frame_task();
-    void convert_frames2gray_task();          // t2 스레드의 실제 작업 함수
-    void edge_detection_task();               // t4 스레드의 실제 작업 함수
+    void capture_frame_task(queue<matadata>& matadata_queue, mutex& matadata_mutexs);
+    void convert_frames2gray_task(queue<matadata>& matadata);                                       // t2 스레드의 실제 작업 함수
+    void edge_detection_task(queue<matadata>& matadata);                                            // t4 스레드의 실제 작업 함수
 
     mutex& getFeatureVectorQueueMutex() { return feature_vector_queue_mtx; }
     mutex& getCIDQueueMutex() { return bgr_cid_mtx; }
@@ -50,7 +52,10 @@ private:
     pthread_mutex_t frameLocker;
     pthread_t UpdThread;
     VideoCapture cap;
-    Mat frame;
+    //Mat frame;
+    Mat currentFrame;
+    Mat m_G_frame;
+    Mat m_edge_result;
 
     queue<Mat> bgr_queue;
     queue<string> cid_queue;

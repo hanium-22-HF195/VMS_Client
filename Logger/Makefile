@@ -14,6 +14,7 @@ CLIENT_DIR    = VMS_Client
 MEDIA_DIR     = media
 MK_TREE_DIR   = MK_Tree
 INFERENCE_DIR = inference
+MATADATA_DIR  = matadata
 
 #--소스 파일 및 오브젝트 파일 설정----
 SRC = Logger.cpp \

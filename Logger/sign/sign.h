@@ -5,15 +5,12 @@
 #include <queue>
 #include <thread>
 #include <mutex>
+#include <pthread.h>
 #include <openssl/rsa.h>
 #include "../MK_Tree/MK_Tree.h"
+#include "../matadata/matadata.h"
 
 using namespace std;
-
-struct HashPair {
-    string hash;
-    string sign_hash;
-};
 
 class Sign_cls {
 public:
@@ -22,20 +19,18 @@ public:
 
     string getPublicKey() const;
     string getPrivateKey() const;
-    char* signMessage(string privateKey, string plainText);
-    void sign_hash(queue<string>& HASH_QUEUE, mutex& hash_queue_mtx);
+    char * signMessage(string privateKey, string plainText);
+    void sign_hash(queue<matadata>& matadata_queue);
 
-    void start_sign_hash_thread(MK_Tree_cls& mk_tree_inst);
-    void sign_hash_task(MK_Tree_cls& mk_tree_inst);
+    void start_sign_hash_thread(queue<matadata>& matadata_queue);
+    void sign_hash_task(queue<matadata>& matadata_queue);
 
     queue<string>& getSignHashQueue() { return hash_signed_queue; }
-    queue<HashPair>& getHashPairQueue() { return HashPair_queue; }
     mutex& getSignHashQueueMutex() { return hash_signed_queue_mtx; }
 private:
     string m_privateKey;
     string m_publicKey;
     queue<string> hash_signed_queue;
-    queue<HashPair> HashPair_queue;
     int signedHashBufSize;
 
     thread sign_hash_thread;

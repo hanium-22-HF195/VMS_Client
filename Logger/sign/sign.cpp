@@ -159,9 +159,10 @@ void Sign_cls::Base64Encode(const unsigned char *buffer, size_t length, char **b
     BIO_flush(bio);
     BIO_get_mem_ptr(bio, &bufferPtr);
     BIO_set_close(bio, BIO_NOCLOSE);
-    BIO_free_all(bio);
-
+    BIO_free_all(bio); //
+    
     *base64Text = strdup((*bufferPtr).data);
+    //BIO_free_all(bio);
 }
 
 void Sign_cls::handleErrors()
@@ -170,16 +171,11 @@ void Sign_cls::handleErrors()
     abort();
 }
 
-void Sign_cls::sign_hash(queue<string>& HASH_QUEUE, mutex& hash_queue_mtx)
+void Sign_cls::sign_hash(queue<matadata>& matadata_queue)
 {
-    HashPair m_HashPair;
     string m_hash;
-    hash_queue_mtx.lock();
-    m_hash = HASH_QUEUE.front();
-    HASH_QUEUE.pop();
-    hash_queue_mtx.unlock();
 
-    //cout << "----Signing Hash by private Key" << endl << endl;
+    m_hash = matadata_queue.front().hash;
 
     char *ch = new char[signedHashBufSize];
     string signed_hash = signMessage(m_privateKey, m_hash);
@@ -187,37 +183,29 @@ void Sign_cls::sign_hash(queue<string>& HASH_QUEUE, mutex& hash_queue_mtx)
     memset(ch, 0, sizeof(char) * signedHashBufSize);
     strcpy(ch, signed_hash.c_str());
 
-    m_HashPair.hash = m_hash;
-    m_HashPair.sign_hash = signed_hash;
-
-    hash_signed_queue_mtx.lock();
-    //hash_signed_queue.push(signed_hash);
-    HashPair_queue.push(m_HashPair);
-    hash_signed_queue_mtx.unlock();
-
-    //cout << "signed_hash : " << signed_hash << endl;
-    //cout << "Successfully make signed_hash" << endl;
+    matadata_queue.front().sign_hash = signed_hash;
 
     delete[] ch;
 }
 
 
-void Sign_cls::sign_hash_task(MK_Tree_cls& mk_tree_inst) {
-    auto last_print_time = chrono::steady_clock::now();
+void Sign_cls::sign_hash_task(queue<matadata>& matadata_queue) {
+    pthread_setname_np(pthread_self(), "thread 6");
     while (true) {
-        if(!mk_tree_inst.getHashQueue().empty()){
-            sign_hash(mk_tree_inst.getHashQueue(), mk_tree_inst.getHashQueueMutex());
-        }
-        auto current_time = chrono::steady_clock::now();
-        auto elapsed = chrono::duration_cast<chrono::seconds>(current_time - last_print_time).count();
-        if (elapsed >= 1) {
-            cout << "    HashPair_queue size : " << HashPair_queue.size() << endl;
-            last_print_time = current_time;
+        if(!matadata_queue.empty()){
+            if(!matadata_queue.front().hash.empty() && matadata_queue.front().sign_hash.empty()){
+                auto total_start_time = chrono::steady_clock::now(); // 총 시간 시작
+                sign_hash(matadata_queue);
+                auto total_end_time = chrono::steady_clock::now(); // 총 시간 끝
+                cout << "T6: "
+                    << chrono::duration_cast<chrono::milliseconds>(total_end_time - total_start_time).count()
+                    << " ms" << endl;
+            }
         }
         this_thread::sleep_for(chrono::milliseconds(10));
     }
 }
 
-void Sign_cls::start_sign_hash_thread(MK_Tree_cls& mk_tree_inst) {
-    sign_hash_thread = thread(&Sign_cls::sign_hash_task, this, ref(mk_tree_inst));
+void Sign_cls::start_sign_hash_thread(queue<matadata>& matadata_queue) {
+    sign_hash_thread = thread(&Sign_cls::sign_hash_task, this, ref(matadata_queue));
 }

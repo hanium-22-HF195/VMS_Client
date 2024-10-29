@@ -6,11 +6,13 @@
 #include <jsoncpp/json/json.h>
 #include <queue>
 #include <thread>
+#include <pthread.h>
 #include <mutex>
 #include "../sign/sign.h"
 #include "../media/Media.h"
 #include "../MK_Tree/MK_Tree.h"
 #include "../inference/inference.h"
+#include "../matadata/matadata.h"
 
 using namespace std;
 
@@ -21,14 +23,17 @@ public:
 
     void send_pubkey_to_server(const string& publicKey);
     //void send_image(queue<string>& CIDQueue);
-    void send_image(Media_cls& media_inst, MK_Tree_cls& mk_tree_inst, Sign_cls& sign_inst, Inference& inference_inst);
+    void send_image(queue<matadata>& matadata_queue, mutex& matadata_mutex);
 
-    void start_send_image_thread(Media_cls& media_inst, MK_Tree_cls& mk_tree_inst, Sign_cls& sign_inst, Inference& inference_inst); // t7 스레드를 시작하는 함수
-    void send_image_task(Media_cls& media_inst, MK_Tree_cls& mk_tree_inst, Sign_cls& sign_inst, Inference& inference_inst);         // t7 스레드의 실제 작업 함수
+    void start_send_image_thread(queue<matadata>& matadata_queue, mutex& matadata_mutex); // t7 스레드를 시작하는 함수
+    void send_image_task(queue<matadata>& matadata_queue, mutex& matadata_mutex);         // t7 스레드의 실제 작업 함수
 private:
     string server_ip;
     string server_port;
-
+    string image_uploadUrl;
+    string responseData;
+    string metadata;
+    
     thread send_image_thread;
     
     void init_libcurl();
