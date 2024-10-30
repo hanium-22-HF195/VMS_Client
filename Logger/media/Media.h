@@ -30,10 +30,10 @@ public:
     void convert_frames2gray(queue<matadata>& matadata_queue);
     void edge_detection_BGR(queue<matadata>& matadata_queue);
 
-    queue<cv::Mat>& getBGRQueue() { return bgr_queue; }
-    queue<cv::Mat>& getGQueue() { return G_queue; }
-    queue<cv::Mat>& getFeatureVectorQueue() { return feature_vector_queue; } 
-    queue<string>& getCIDQueue() { return cid_queue; } 
+    // queue<cv::Mat>& getBGRQueue() { return bgr_queue; }
+    // queue<cv::Mat>& getGQueue() { return G_queue; }
+    // queue<cv::Mat>& getFeatureVectorQueue() { return feature_vector_queue; } 
+    // queue<string>& getCIDQueue() { return cid_queue; } 
     Mat getEdgeResult() { return m_edge_result; }
 
     void start_capture_thread(queue<matadata>& matadata_queue, mutex& matadata_mutex);
@@ -46,8 +46,8 @@ public:
     void convert_frames2gray_task(queue<matadata>& matadata_queue);                                      
     void edge_detection_task(queue<matadata>& matadata_queue);                                            
 
-    mutex& getFeatureVectorQueueMutex() { return feature_vector_queue_mtx; }
-    mutex& getCIDQueueMutex() { return bgr_cid_mtx; }
+    // mutex& getFeatureVectorQueueMutex() { return feature_vector_queue_mtx; }
+    // mutex& getCIDQueueMutex() { return bgr_cid_mtx; }
 
 private:
     int width, height, fps, frame_count;
