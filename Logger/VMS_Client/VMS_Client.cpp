@@ -93,7 +93,9 @@ void VMS_Client_cls::send_image(queue<matadata>& matadata_queue, mutex& matadata
     matadata_queue.pop();
     matadata_mutex.unlock();
 
-    string imagePath = "/home/pi/images/" + m_cid + ".jpg";
+    string home_dir = getenv("HOME");
+    string imagePath = home_dir +"/images/" + m_cid + ".jpg";
+    //string imagePath = "/home/pi/images/" + m_cid + ".jpg";
 
     CURL* curl = curl_easy_init();
     if (!curl) {
@@ -128,6 +130,8 @@ void VMS_Client_cls::send_image(queue<matadata>& matadata_queue, mutex& matadata
         cerr << "Error during HTTP request: " << curl_easy_strerror(res) << endl;
     } else {
         //cout << "Response Message: " << responseData << endl;
+        cout << "Send data successfully"  << endl;
+        remove(imagePath.c_str());
     }
     curl_formfree(formpost);
     curl_easy_cleanup(curl);

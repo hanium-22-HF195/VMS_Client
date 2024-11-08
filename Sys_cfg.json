@@ -1,32 +1,4 @@
 {
-    "Server" :
-    {
-        "Server Port"           : 8700,
-        "storage dir"           : "/home/cloud/images/",
-
-        "Hash size"             : 64,
-        "Signed hash size"      : 350,
-        "CID size"              : 23,
-
-        "public key path"       : "/home/cloud/hanium_2024/Logger_Verifier/pubkey.txt",
-        "private key path"      : "/home/cloud/hanium_2024/Logger_Verifier/prikey.txt",
-        "Password"              : "This is password",
-        "Number of Share"       : 10,
-        "Gen Key Threshold"     : 5,
-
-        "Salt"                  : "This is Salt"
-    },
-
-    "Client" :
-    {
-        "Server IP addr"        : "127.0.0.1",
-        "Server port"           : 8700,
-
-        "Hash size"             : 64,
-        "Signed hash size"      : 350,
-        "CID size"              : 23
-    },
-
     "Logger" :
     {
         "width"                 : 640,
@@ -35,38 +7,11 @@
         "frame count"           : 10,
         "signed hash bufsize"   : 350,
         
-        "Y frame file path"     : "/home/jetson/images",
-        "hash file path"        : "/home/jetson/Web-UI/static/hash.txt",
         "original file path"    : "/home/pi/images/",
         
-        "Object Detector Server IP addr": "192.168.0.20",
+        "Object Detector Server IP addr": "192.168.0.6",
         "Object Detector Server port": 8080,
-        "Server IP addr": "192.168.0.20",
+        "Server IP addr": "192.168.0.6",
         "Server port": 8080
-    },
-
-    "HeaderPacket" :
-    {
-        "Command Header size"   : 8,
-        "ASYNC BUFSIZE"         : 4096,
-        "Max User Count"        : 5
-    },
-
-    "Database" :
-    {
-        "DB IP"                 : "127.0.0.1",
-        "DB user"               : "hanium",
-        "DB password"           : "1234",
-        "DB database"           : "hanium",
-        "storage dir"           : "/home/cloud/images/"
-    }, 
-
-    "Default data size" :
-    {
-        "Hash size"             : 64,
-        "Signed hash size"      : 350,
-        "CID size"              : 23
-    },
-
-    "command for test"          : 128
+    }
 }

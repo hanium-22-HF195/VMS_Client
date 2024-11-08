@@ -23,20 +23,15 @@ public:
     Inference(const Config_cls& config);
 
     void send_request(queue<matadata>& matadata_queue);
-    queue<ODResult>& getODResultQueue() { return OD_result_queue; }
 
     void start_send_request_thread(queue<matadata>& matadata_queue);
     void send_request_task(queue<matadata>& matadata_queue);
-    mutex& getODResultQueueMutex() { return OD_result_queue_mtx; }
 
 private:
     thread objectDetection_thread;
     string m_server_ip_;
     int m_server_port_;
     string m_image_path_;
-    queue<ODResult> OD_result_queue;
-    mutex OD_result_queue_mtx;
-    
 };
 
 

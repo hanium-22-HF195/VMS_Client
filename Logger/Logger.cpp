@@ -37,7 +37,7 @@ int main() {
     media_inst.start_capture_thread(matadata_queue, matadata_mutex);
     media_inst.start_capture_save_thread(matadata_queue);
     media_inst.start_convert_frames2gray_thread(matadata_queue);
-    inference_inst.start_send_request_thread(matadata_queue); 
+    inference_inst.start_send_request_thread(matadata_queue);
     media_inst.start_edge_detection_thread(matadata_queue);
     mk_tree_inst.start_make_hash_thread(matadata_queue, media_inst);
     sign_inst.start_sign_hash_thread(matadata_queue);
