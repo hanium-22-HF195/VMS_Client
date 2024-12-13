@@ -1,6 +1,9 @@
 #ifndef VMS_CLIENT_H
 #define VMS_CLIENT_H
 
+#include <fstream>
+#include <chrono>
+#include <iostream>
 #include <string>
 #include <curl/curl.h>
 #include <jsoncpp/json/json.h>
@@ -13,6 +16,8 @@
 #include "../MK_Tree/MK_Tree.h"
 #include "../inference/inference.h"
 #include "../matadata/matadata.h"
+
+#include <spdlog/spdlog.h>
 
 using namespace std;
 
@@ -37,7 +42,7 @@ private:
     thread send_image_thread;
     
     void init_libcurl();
-    string create_metadata(const string& mk_root_hash, const string& sign_hash, const string& cid, const ODResult& result);
+    string create_metadata(const string& mk_root_hash, const string& sign_hash, const string& cid, const string& result);
 
 };
 

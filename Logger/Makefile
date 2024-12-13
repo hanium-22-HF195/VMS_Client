@@ -4,8 +4,9 @@ CXX = g++
 #--플래그 및 라이브러리 설정----
 SIGN_VER_FLAGS = -lssl -lcrypto -L /usr/local/opt/openssl/lib
 OPENCV = `pkg-config --cflags --libs opencv4`
-LIBS = $(OPENCV) -lcurl -ljsoncpp -g -lpthread
-CXXFLAGS = -Wall -Wextra -g -O0
+SPDLOG_LIBS = -lspdlog
+LIBS = $(OPENCV) -lcurl -ljsoncpp -g -lpthread $(SPDLOG_LIBS)
+CXXFLAGS = -Wall -Wextra -g -O1
 
 #--폴더 설정----
 CONFIG_DIR    = config
@@ -44,7 +45,7 @@ Logger: $(OBJ)
 
 #--개별 소스 파일을 오브젝트 파일로 컴파일하는 규칙----
 %.o: %.cpp
-	$(CXX) -c $< -o $@ $(CXXFLAGS) $(LIBS)
+	$(CXX) -c $< -o $@ $(CXXFLAGS) $(OPENCV)
 
 #--clean 규칙----
 clean:

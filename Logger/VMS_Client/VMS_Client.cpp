@@ -54,17 +54,13 @@ void VMS_Client_cls::send_pubkey_to_server(const string& publicKey) {
 string VMS_Client_cls::create_metadata(const string& cid, 
                                         const string& hash, 
                                         const string& sign_hash, 
-                                        const ODResult& ODresult) {
+                                        const string& ODresult) {
     Json::Value metadata;
     metadata["CID"] = cid;
-    metadata["MK_root_hash"] = hash;
+    metadata["hash"] = hash;
     metadata["sign_hash"] = sign_hash;
     metadata["mediaType"] = "BGR";
-
-    metadata["label"] = ODresult.label;
-    metadata["prob"] = ODresult.prob;
-    metadata["positionbox"] = ODresult.positionbox;
-    metadata["objectcount"] = ODresult.objectcount;
+    metadata["Object_Detection_Result"] = ODresult;
 
     Json::StreamWriterBuilder writer;
     return Json::writeString(writer, metadata);
@@ -86,15 +82,15 @@ void VMS_Client_cls::send_image(queue<matadata>& matadata_queue, mutex& matadata
     string m_sign_hash;
     m_sign_hash = matadata_queue.front().sign_hash;
 
-    ODResult m_OD_result;
+    string m_OD_result;
     m_OD_result = matadata_queue.front().object_Detection_result;
 
-    matadata_mutex.lock();
+    //matadata_mutex.lock();
     matadata_queue.pop();
-    matadata_mutex.unlock();
+    //matadata_mutex.unlock();
 
     string home_dir = getenv("HOME");
-    string imagePath = home_dir +"/images/" + m_cid + ".jpg";
+    string imagePath = home_dir +"/images/" + m_cid + ".png";
     //string imagePath = "/home/pi/images/" + m_cid + ".jpg";
 
     CURL* curl = curl_easy_init();
@@ -144,17 +140,40 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* userp) {
     return size * nmemb;
 }
 
+// void VMS_Client_cls::send_image_task(queue<matadata>& matadata_queue, mutex& matadata_mutex) {
+//     pthread_setname_np(pthread_self(), "thread 7");
+//     while (true) {
+//         if(!matadata_queue.empty()){
+//             if (!matadata_queue.front().sign_hash.empty() && 
+//                 !matadata_queue.front().object_Detection_result.label.empty() &&
+//                 matadata_queue.front().image_save_state == true) {
+//                 send_image(matadata_queue, matadata_mutex);
+//             }
+//         }
+//         this_thread::sleep_for(chrono::milliseconds(10));
+//     }
+// }
+
 void VMS_Client_cls::send_image_task(queue<matadata>& matadata_queue, mutex& matadata_mutex) {
     pthread_setname_np(pthread_self(), "thread 7");
+
     while (true) {
-        if(!matadata_queue.empty()){
+        if (!matadata_queue.empty()) {
             if (!matadata_queue.front().sign_hash.empty() && 
-                !matadata_queue.front().object_Detection_result.label.empty() &&
+                matadata_queue.front().object_Detection_result_state == true &&
                 matadata_queue.front().image_save_state == true) {
+                
+                auto total_start_time = std::chrono::steady_clock::now();
                 send_image(matadata_queue, matadata_mutex);
+                auto total_end_time = std::chrono::steady_clock::now();
+
+                int duration = std::chrono::duration_cast<std::chrono::milliseconds>(total_end_time - total_start_time).count();
+                spdlog::info("T7: {} ms", duration);
+
+                std::cout << "T7: " << duration << " ms" << std::endl;
             }
         }
-        this_thread::sleep_for(chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 

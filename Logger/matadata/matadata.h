@@ -7,12 +7,12 @@
 using namespace std;
 using namespace cv;
 
-struct ODResult {
-    string label;
-    string prob;         
-    string positionbox; 
-    int objectcount;     
-};
+// struct ODResult {
+//     string label;
+//     string prob;         
+//     string positionbox; 
+//     int objectcount;     
+// };
 
 struct matadata {
     string cid;
@@ -22,7 +22,8 @@ struct matadata {
     bool feature_vector_state = false;
     string hash;
     string sign_hash;
-    ODResult object_Detection_result;
+    string object_Detection_result;
+    bool object_Detection_result_state = false;
 };
 
 #endif // MATADATA_H

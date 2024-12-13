@@ -189,20 +189,40 @@ void Sign_cls::sign_hash(queue<matadata>& matadata_queue)
 }
 
 
+// void Sign_cls::sign_hash_task(queue<matadata>& matadata_queue) {
+//     pthread_setname_np(pthread_self(), "thread 6");
+//     while (true) {
+//         if(!matadata_queue.empty()){
+//             if(!matadata_queue.front().hash.empty() && matadata_queue.front().sign_hash.empty()){
+//                 auto total_start_time = chrono::steady_clock::now(); // 총 시간 시작
+//                 sign_hash(matadata_queue);
+//                 auto total_end_time = chrono::steady_clock::now(); // 총 시간 끝
+//                 cout << "T6: "
+//                     << chrono::duration_cast<chrono::milliseconds>(total_end_time - total_start_time).count()
+//                     << " ms" << endl;
+//             }
+//         }
+//         this_thread::sleep_for(chrono::milliseconds(10));
+//     }
+// }
+
 void Sign_cls::sign_hash_task(queue<matadata>& matadata_queue) {
     pthread_setname_np(pthread_self(), "thread 6");
+
     while (true) {
-        if(!matadata_queue.empty()){
-            if(!matadata_queue.front().hash.empty() && matadata_queue.front().sign_hash.empty()){
-                auto total_start_time = chrono::steady_clock::now(); // 총 시간 시작
+        if (!matadata_queue.empty()) {
+            if (!matadata_queue.front().hash.empty() && matadata_queue.front().sign_hash.empty()) {
+                auto total_start_time = std::chrono::steady_clock::now();
                 sign_hash(matadata_queue);
-                auto total_end_time = chrono::steady_clock::now(); // 총 시간 끝
-                cout << "T6: "
-                    << chrono::duration_cast<chrono::milliseconds>(total_end_time - total_start_time).count()
-                    << " ms" << endl;
+                auto total_end_time = std::chrono::steady_clock::now();
+
+                int duration = std::chrono::duration_cast<std::chrono::milliseconds>(total_end_time - total_start_time).count();
+                spdlog::info("T6: {} ms", duration);
+
+                std::cout << "T6: " << duration << " ms" << std::endl;
             }
         }
-        this_thread::sleep_for(chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 

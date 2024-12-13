@@ -1,6 +1,9 @@
 #ifndef SIGN_H
 #define SIGN_H
 
+#include <fstream>
+#include <chrono>
+#include <iostream>
 #include <string>
 #include <queue>
 #include <thread>
@@ -9,6 +12,8 @@
 #include <openssl/rsa.h>
 #include "../MK_Tree/MK_Tree.h"
 #include "../matadata/matadata.h"
+
+#include <spdlog/spdlog.h>
 
 using namespace std;
 

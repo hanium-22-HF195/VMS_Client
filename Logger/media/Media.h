@@ -3,6 +3,7 @@
 
 #include <sys/timeb.h>
 #include <iostream>
+#include <fstream>
 #include "../config/Config.h"
 #include "../matadata/matadata.h"
 #include <opencv2/opencv.hpp>
@@ -12,6 +13,8 @@
 #include <pthread.h>
 #include <thread>
 #include "create_cid.h"
+
+#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace cv;

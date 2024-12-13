@@ -12,7 +12,19 @@
 #include <queue>
 #include <unistd.h> 
 
-using namespace std;
+#include <spdlog/spdlog.h>
+#include <spdlog/async.h>
+#include <spdlog/sinks/basic_file_sink.h>
+
+void init_logging() {
+    spdlog::init_thread_pool(8192, 8); // 큐 크기와 스레드 수 설정
+    auto async_file_logger = spdlog::basic_logger_mt<spdlog::async_factory>("async_logger", "thread_time_test.log");
+    spdlog::set_default_logger(async_file_logger);
+    spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [thread %t] [%l] %v");
+    spdlog::info("Logger initialized.");
+}
+
+using namespace std;    
 
 void process_loop() {
     while (true) {
@@ -21,6 +33,8 @@ void process_loop() {
 }
 
 int main() {
+    init_logging();
+
     Config_cls config_inst;
 
     Sign_cls sign_inst(config_inst.getSignedHashBufSize());

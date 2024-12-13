@@ -43,13 +43,14 @@ int Media_cls::set_frame() {
         return -1;
     }
 
+    cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
     cap.set(CAP_PROP_FRAME_WIDTH, width);
     cap.set(CAP_PROP_FRAME_HEIGHT, height);
     cap.set(CAP_PROP_FPS, fps);
 
-    // // cout << "    Frame Width: " << cvRound(cap.get(CAP_PROP_FRAME_WIDTH)) << endl;
-    // // cout << "    Frame Height: " << cvRound(cap.get(CAP_PROP_FRAME_HEIGHT)) << endl;
-    // // cout << "    FPS : " << cvRound(cap.get(CAP_PROP_FPS)) << endl;
+    cout << "    Frame Width: " << cvRound(cap.get(CAP_PROP_FRAME_WIDTH)) << endl;
+    cout << "    Frame Height: " << cvRound(cap.get(CAP_PROP_FRAME_HEIGHT)) << endl;
+    cout << "    FPS : " << cvRound(cap.get(CAP_PROP_FPS)) << endl;
 
     Mat img(Size(width, height), CV_8UC3, Scalar(0));
     this->currentFrame = img.clone();
@@ -59,53 +60,41 @@ int Media_cls::set_frame() {
     return 0;
 }
 
+//int capture_count = 0; //Global variables for testing
 void Media_cls::capture_frame(queue<matadata>& matadata_queue, mutex& matadata_mutex) {
-    unsigned int captured_threshold = 100; //config file에서 관리하도록 변경
-    int captured_frames = 0;
+    unsigned int captured_threshold = 100;
 
     matadata data;
-    Mat frameClone(Size(height, width), CV_8UC3);
     while (true) {
+        // if(capture_count >= 1000){
+        //     spdlog::info("finish time test");
+        //     break;
+        // }
         if (matadata_queue.size() > captured_threshold) {
             cout << "Queue exceeds its threshold" << endl;
-            break;
-        }
-
-        cap.read(currentFrame);
-
-        int sum1 = (int)sum(currentFrame)[0];
-        int sum2 = (int)sum(currentFrame)[1];
-        int sum3 = (int)sum(currentFrame)[2];
-        int elementmean = (sum1 + sum2 + sum3) / 3;
-
-        frameClone = currentFrame.clone();
-
-        if (frameClone.empty())
-        {
-            cout << "Frame is empty" << endl;
+            spdlog::info("Queue exceeds its threshold");
+            this_thread::sleep_for(chrono::milliseconds(800));
+            lamping_time();
             continue;
         }
-        else if (elementmean != 0)
-        {
-            matadata_mutex.lock();
-            data.cid = getCID(); 
-            data.BGR_frame = frameClone;
-            matadata_queue.push(data);
-            matadata_mutex.unlock();
+        auto frame_start_time = std::chrono::steady_clock::now();
 
-            captured_frames++;
-        }
-        else
-        {
-            cout << "lamping time" << endl;
-        }
-        if (captured_frames >= frame_count) {
-            break;
-        }
+        cap.read(currentFrame);
+        auto frame_end_time = std::chrono::steady_clock::now();
+        int duration = std::chrono::duration_cast<std::chrono::milliseconds>(frame_end_time - frame_start_time).count();
+
+        data.cid = getCID();
+        data.BGR_frame = currentFrame;
+        matadata_queue.push(data);
+        
+
+        std::cout << "T0: " << duration << " ms" << std::endl;
+        spdlog::info("T0: {} ms", duration);
+        //capture_count++;
+        std::this_thread::sleep_for(std::chrono::milliseconds(3));
+        // this_thread::sleep_for(chrono::milliseconds(8000000));
     }
-    cout << "Capture End Successfully." << endl;
     data.BGR_frame.release();
-    frameClone.release();
 }
 
 void Media_cls::image_save(queue<matadata>& matadata_queue) {
@@ -114,10 +103,12 @@ void Media_cls::image_save(queue<matadata>& matadata_queue) {
 
     m_cid = matadata_queue.front().cid;
     matadata_queue.front().BGR_frame.copyTo(original);
-    string img_name = orifile_path + m_cid + ".jpg";
+    string img_name = orifile_path + m_cid + ".png";
 
-    cout << "img_name : "<< img_name << endl;
+    //cout << "img_name : "<< img_name << endl;
     imwrite(img_name, original);
+    // 이부분에서 추가
+    // 저장 사진과 현재 matadata_queue.front().BGR_frame를 비교 
 
     matadata_queue.front().image_save_state = true;
 
@@ -158,20 +149,21 @@ void Media_cls::start_capture_thread(queue<matadata>& matadata_queue, mutex& mat
     capture_thread = thread(&Media_cls::capture_frame_task, this, ref(matadata_queue), ref(matadata_mutex));
 }
 
-void Media_cls::capture_image_save_task(queue<matadata>& matadata_queue) {
+void Media_cls::capture_image_save_task(std::queue<matadata>& matadata_queue) {
     pthread_setname_np(pthread_self(), "thread 1");
+
     while (true) {
-        if(!matadata_queue.empty()){
-            if(!matadata_queue.front().cid.empty() && matadata_queue.front().image_save_state == false ){
-                auto total_start_time = chrono::steady_clock::now();
+        if (!matadata_queue.empty()) {
+            if (!matadata_queue.front().cid.empty() && matadata_queue.front().image_save_state == false) {
+                auto total_start_time = std::chrono::steady_clock::now();
                 image_save(matadata_queue);
-                auto total_end_time = chrono::steady_clock::now();
-                cout << "T1: "
-                    << chrono::duration_cast<chrono::milliseconds>(total_end_time - total_start_time).count()
-                    << " ms" << endl;
+                auto total_end_time = std::chrono::steady_clock::now();
+
+                int duration = std::chrono::duration_cast<std::chrono::milliseconds>(total_end_time - total_start_time).count();
+                spdlog::info("T1: {} ms", duration);
             }
         }
-        this_thread::sleep_for(chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -181,19 +173,21 @@ void Media_cls::start_capture_save_thread(queue<matadata>& matadata_queue) {
 
 void Media_cls::convert_frames2gray_task(queue<matadata>& matadata_queue) {
     pthread_setname_np(pthread_self(), "thread 2");
-    
+
     while (true) {
-        if(!matadata_queue.empty()){
-            if(!matadata_queue.front().cid.empty() && matadata_queue.front().G_frame_state == false ){
-                auto total_start_time = chrono::steady_clock::now(); // 총 시간 시작
+        if (!matadata_queue.empty()) {
+            if (!matadata_queue.front().cid.empty() && matadata_queue.front().G_frame_state == false) {
+                auto total_start_time = std::chrono::steady_clock::now();
                 convert_frames2gray(matadata_queue);
-                auto total_end_time = chrono::steady_clock::now(); // 총 시간 끝
-                cout << "T2: "
-                    << chrono::duration_cast<chrono::milliseconds>(total_end_time - total_start_time).count()
-                    << " ms" << endl;
+                auto total_end_time = std::chrono::steady_clock::now();
+
+                int duration = std::chrono::duration_cast<std::chrono::milliseconds>(total_end_time - total_start_time).count();
+                spdlog::info("T2: {} ms", duration);
+
+                std::cout << "T2: " << duration << " ms" << std::endl;
             }
         }
-        this_thread::sleep_for(chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -203,20 +197,24 @@ void Media_cls::start_convert_frames2gray_thread(queue<matadata>& matadata_queue
 
 void Media_cls::edge_detection_task(queue<matadata>& matadata_queue) {
     pthread_setname_np(pthread_self(), "thread 4");
+
     while (true) {
-        if(!matadata_queue.empty()){
-            if(matadata_queue.front().G_frame_state == true && matadata_queue.front().feature_vector_state == false ){
-                auto total_start_time = chrono::steady_clock::now(); // 총 시간 시작
+        if (!matadata_queue.empty()) {
+            if (matadata_queue.front().G_frame_state == true && matadata_queue.front().feature_vector_state == false) {
+                auto total_start_time = std::chrono::steady_clock::now();
                 edge_detection_BGR(matadata_queue);
-                auto total_end_time = chrono::steady_clock::now(); // 총 시간 끝
-                cout << "T4: "
-                    << chrono::duration_cast<chrono::milliseconds>(total_end_time - total_start_time).count()
-                    << " ms" << endl;
+                auto total_end_time = std::chrono::steady_clock::now();
+
+                int duration = std::chrono::duration_cast<std::chrono::milliseconds>(total_end_time - total_start_time).count();
+                spdlog::info("T4: {} ms", duration);
+
+                std::cout << "T4: " << duration << " ms" << std::endl;
             }
         }
-        this_thread::sleep_for(chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
+
 
 void Media_cls::start_edge_detection_thread(queue<matadata>& matadata_queue) {
     edge_thread = thread(&Media_cls::edge_detection_task, this, ref(matadata_queue));

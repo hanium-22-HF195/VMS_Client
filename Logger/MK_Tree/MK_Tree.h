@@ -1,6 +1,9 @@
 #ifndef MK_TREE_H
 #define MK_TREE_H
 
+#include <fstream>
+#include <chrono>
+#include <iostream>
 #include <queue>
 #include <opencv2/opencv.hpp>
 #include <string>
@@ -8,6 +11,8 @@
 #include <mutex>
 #include "../media/Media.h"
 #include "Merkle_Tree/merkle_tree.h"
+
+#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace cv;

@@ -9,9 +9,9 @@
         
         "original file path"    : "/home/pi/images/",
         
-        "Object Detector Server IP addr": "192.168.0.6",
+        "Object Detector Server IP addr": "192.168.0.20",
         "Object Detector Server port": 8080,
-        "Server IP addr": "192.168.0.6",
+        "Server IP addr": "192.168.0.20",
         "Server port": 8080
     }
 }
